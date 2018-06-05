@@ -4,7 +4,7 @@ tk = Tk()
 tk.geometry('400x300')
 tk.focus_set()
 
-letters = ['d', 'm', 'a', 'e', 'r']
+letters = list('super')
 pos = -1
 caps = False
 
@@ -21,8 +21,8 @@ def scroll(event):
                 old_list_left.append(letters[i])
         for i in range(pos, newpos+1):
             new_list.append(letters[i])        
-        if newpos < 4:
-            for i in range(newpos+1, 5):
+        if newpos < len(letters)-1:
+            for i in range(newpos+1, len(letters)):
                 old_list_right.append(letters[i])
         new_list.insert(0, new_list.pop())
         letters = old_list_left + new_list + old_list_right
@@ -32,16 +32,14 @@ def scroll(event):
                 old_list_left.append(letters[i]) 
         for i in range(newpos, pos+1):
             new_list.append(letters[i])
-        if pos < 4:
-            for i in range(pos+1, 5):
+        if pos < len(letters)-1:
+            for i in range(pos+1, len(letters)):
                 old_list_right.append(letters[i])
         new_list.append(new_list.pop(0))
         letters = old_list_left + new_list + old_list_right
     print letters 
     canvas.itemconfigure(text, text=letters)
-
-    
-      
+     
 
 def clear(event):
     global pos
@@ -50,7 +48,7 @@ def clear(event):
     tk.bind('<Right>', move)
     tk.bind('<Shift-Left>', move1) 
     tk.bind('<Shift-Right>', move1)
-    for i in range(0, 5):
+    for i in range(0, len(letters)):
             letters[i] = letters[i].lower()
     canvas.itemconfigure(text, text=letters)
     
@@ -63,10 +61,17 @@ def move(event):
     global pos
     global newpos
     global caps
+    global letters
     if caps == True:
-        for i in range(0, 5):
+        for i in range(0, len(letters)):
             letters[i] = letters[i].lower()
-        if newpos > pos and event.keysym == 'Left':
+        if newpos == pos and event.keysym == 'Left':
+            pos = pos - 1
+            newpos = pos
+        elif newpos == pos and event.keysym == 'Right':
+            pos = pos + 1
+            newpos = pos
+        elif newpos > pos and event.keysym == 'Left':
             tk.bind('<Left>', move)
             tk.bind('<Shift-Left>', move1)
             pos = newpos 
@@ -74,8 +79,9 @@ def move(event):
             tk.bind('<Left>', move)
             tk.bind('<Shift-Left>', move1)
             pos = newpos + 1
-            if pos > 4:
-                pos = 4
+            if pos > len(letters)-1:
+                pos = len(letters)-1
+            newpos = pos
         elif newpos < pos and event.keysym == 'Right':
             tk.bind('<Right>', move)
             tk.bind('<Shift-Right>', move1) 
@@ -86,6 +92,7 @@ def move(event):
             pos = newpos - 1
             if pos < 0:
                 pos = 0
+            newpos = pos
         letters[pos] = letters[pos].upper()
         canvas.itemconfigure(text, text=letters)
     if event.keysym == 'Left' and caps == False:
@@ -93,15 +100,15 @@ def move(event):
         oldpos = pos
         pos = pos - 1
         if pos < 0:
-            pos = 4
-        elif pos > 4:
+            pos = len(letters)-1
+        elif pos > len(letters)-1:
             pos = 0
     if event.keysym == 'Right' and caps == False:
         oldpos = pos
         pos = pos + 1
         if pos < - 1:
-            pos = 4
-        elif pos > 4:
+            pos = len(letters)-1
+        elif pos > len(letters)-1:
             pos = 0
         #letters.insert(0, letters.pop())
     if caps == False:
@@ -116,31 +123,38 @@ def move1(event):
     global pos 
     global newpos
     global caps
+    global letters
     tk.bind('<Return>', scroll)
     tk.bind('<Escape>', clear)
+    if pos == -1:
+        return
     caps = True
     if event.keysym == 'Left':
-        tk.unbind('<Shift-Right>')
+        #tk.unbind('<Shift-Right>')
         #tk.unbind('<Right>')
         if newpos == pos:
             newpos = pos - 1
         elif newpos != pos:
+            if letters[newpos].isupper():
+                letters[newpos] = letters[newpos].lower()
             newpos = newpos - 1
         if newpos < 0:
             newpos = 0
-        elif newpos > 4:
-            newpos = 4
+        elif newpos > len(letters)-1:
+            newpos = len(letters)-1
     if event.keysym == 'Right':
-        tk.unbind('<Shift-Left>')
+        #tk.unbind('<Shift-Left>')
         #tk.unbind('<Left>')
         if newpos == pos:
             newpos = pos + 1
         elif newpos != pos:
+            if letters[newpos].isupper():
+                letters[newpos] = letters[newpos].lower()
             newpos = newpos + 1
         if newpos <  0:
             newpos = 0
-        elif newpos > 4:
-            newpos = 4
+        elif newpos > len(letters)-1:
+            newpos = len(letters)-1
     if newpos < pos:
         for i in range(newpos, pos):
             letters[i] = letters[i].upper()
@@ -159,7 +173,65 @@ tk.bind('<Left>', move)
 tk.bind('<Right>', move)
 tk.bind('<Shift-Left>', move1)
 tk.bind('<Shift-Right>', move1)
+tk.bind('<Escape>', clear)
 
 
+tk.mainloop()
+'''
+n = 0
+
+def move1(event=None):
+    global n
+    if event.keysym == 'Left':
+        lists[n%2].append(lists[n%2].pop(0))
+    if event.keysym == 'Right':
+        lists[n%2].insert(0, lists[n%2].pop())
+    if event.keysym == 'Up' or event.keysym == 'Down':
+         n = n + 1
+     
+    label1.configure(text=frame1_list[0])
+    label2.configure(text=frame1_list[1])
+    label3.configure(text=frame1_list[2])
+    label4.configure(text=frame2_list[0])
+    label5.configure(text=frame2_list[1])
+    label6.configure(text=frame2_list[2])
+
+def move2(event=None):
+    if event.keysym == 'Left':
+        labels_frame1.append(labels_frame1.pop(0)) 
+        labels_frame1[0].configure(text=frame1_list[0].upper())
+
+tk.bind('<Shift-Left>', move1)
+tk.bind('<Shift-Right>', move1)
+tk.bind('<Left>', move2)
+tk.bind('<Right>', move2)
+tk.bind('<Up>', move1)
+tk.bind('<Down>', move1)
+
+
+frame1_list = ['a', 'b', 'c']
+frame2_list = ['d', 'e', 'f'] 
+lists = [frame1_list, frame2_list]
+
+frame1 = Frame(tk)
+frame2 = Frame(tk)
+label1 = Label(frame1, text=frame1_list[0], font=('helvetica', 16))
+label2 = Label(frame1, text=frame1_list[1], font=('helvetica', 16))
+label3 = Label(frame1, text=frame1_list[2], font=('helvetica', 16))
+label4 = Label(frame2, text=frame2_list[0], font=('helvetica', 16))
+label5 = Label(frame2, text=frame2_list[1], font=('helvetica', 16))
+label6 = Label(frame2, text=frame2_list[2], font=('helvetica', 16))
+
+frame1.pack(expand=YES, fill=Y)
+frame2.pack(expand=YES, fill=Y)
+label1.pack(side=LEFT, expand=YES, anchor=S)
+label2.pack(side=LEFT, expand=YES, anchor=S)
+label3.pack(side=LEFT, expand=YES, anchor=S)
+label4.pack(side=LEFT, expand=YES, anchor=N)
+label5.pack(side=LEFT, expand=YES, anchor=N)
+label6.pack(side=LEFT, expand=YES, anchor=N)
+
+labels_frame1 = [label1, label2, label3]
+labels_frame2 = [label4, label5, label6]
 
 tk.mainloop()
