@@ -1,23 +1,24 @@
 from Tkinter import *
+from random import shuffle
 
 tk = Tk()
 tk.geometry('400x300')
 tk.focus_set()
 
-letters = list('super')
+letters = list('confusion')
+shuffle(letters)
 pos = -1
+newpos = -1
 caps = False
-
 
 def scroll(event):
     new_list = []
     old_list_left = []
     old_list_right = []
     global letters
-    print pos, newpos
     if pos < newpos:
         if pos > 0:
-            for i in range (0,pos):
+            for i in range (0, pos):
                 old_list_left.append(letters[i])
         for i in range(pos, newpos+1):
             new_list.append(letters[i])        
@@ -37,10 +38,8 @@ def scroll(event):
                 old_list_right.append(letters[i])
         new_list.append(new_list.pop(0))
         letters = old_list_left + new_list + old_list_right
-    print letters 
     canvas.itemconfigure(text, text=letters)
-     
-
+ 
 def clear(event):
     global pos
     global caps
@@ -55,8 +54,7 @@ def clear(event):
     pos = -1
     newpos = pos
     caps = False
-    print pos, newpos
-
+    
 def move(event):
     global pos
     global newpos
@@ -71,32 +69,39 @@ def move(event):
         elif newpos == pos and event.keysym == 'Right':
             pos = pos + 1
             newpos = pos
-        elif newpos > pos and event.keysym == 'Left':
+        elif pos < newpos and event.keysym == 'Left':
             tk.bind('<Left>', move)
             tk.bind('<Shift-Left>', move1)
-            pos = newpos 
-        elif newpos > pos and event.keysym == 'Right':
+            pos = pos - 1
+            if pos == -1:
+                pos = 0
+            newpos = pos 
+        elif pos < newpos and event.keysym == 'Right':
             tk.bind('<Left>', move)
             tk.bind('<Shift-Left>', move1)
             pos = newpos + 1
-            if pos > len(letters)-1:
-                pos = len(letters)-1
+            if pos == len(letters):
+                pos = pos - 1
             newpos = pos
         elif newpos < pos and event.keysym == 'Right':
             tk.bind('<Right>', move)
             tk.bind('<Shift-Right>', move1) 
-            pos = newpos
+            pos = pos + 1
+            if pos == len(letters):
+                pos = len(letters)-1
+            newpos = pos
         elif newpos < pos and event.keysym == 'Left':
             tk.bind('<Right>', move)
             tk.bind('<Shift-Right>', move1)
             pos = newpos - 1
-            if pos < 0:
+            if pos == -1:
                 pos = 0
             newpos = pos
         letters[pos] = letters[pos].upper()
         canvas.itemconfigure(text, text=letters)
+    letters[pos] = letters[pos].upper()
+    canvas.itemconfigure(text, text=letters)
     if event.keysym == 'Left' and caps == False:
-        #letters.append(letters.pop(0))
         oldpos = pos
         pos = pos - 1
         if pos < 0:
@@ -109,15 +114,13 @@ def move(event):
         if pos < - 1:
             pos = len(letters)-1
         elif pos > len(letters)-1:
-            pos = 0
-        #letters.insert(0, letters.pop())
+            pos = 0     
     if caps == False:
         letters[oldpos] = letters[oldpos].lower() 
         letters[pos] = letters[pos].upper()
         canvas.itemconfigure(text, text=letters)
         newpos = pos
     caps = False
-    print pos, newpos 
 
 def move1(event):
     global pos 
@@ -126,13 +129,16 @@ def move1(event):
     global letters
     tk.bind('<Return>', scroll)
     tk.bind('<Escape>', clear)
-    if pos == -1:
-        return
+    '''if pos == -1:
+        return'''
     caps = True
     if event.keysym == 'Left':
-        #tk.unbind('<Shift-Right>')
-        #tk.unbind('<Right>')
-        if newpos == pos:
+        if pos == -1:
+            pos = len(letters) - 1
+            newpos = pos
+            letters[pos] = letters[pos].upper()
+            canvas.itemconfigure(text, text=letters)
+        elif newpos == pos:
             newpos = pos - 1
         elif newpos != pos:
             if letters[newpos].isupper():
@@ -142,10 +148,13 @@ def move1(event):
             newpos = 0
         elif newpos > len(letters)-1:
             newpos = len(letters)-1
-    if event.keysym == 'Right':
-        #tk.unbind('<Shift-Left>')
-        #tk.unbind('<Left>')
-        if newpos == pos:
+    elif event.keysym == 'Right':
+        if pos == -1:
+            pos = 0
+            newpos = pos
+            letters[pos] = letters[pos].upper()
+            canvas.itemconfigure(text, text=letters)
+        elif newpos == pos:
             newpos = pos + 1
         elif newpos != pos:
             if letters[newpos].isupper():
@@ -162,12 +171,10 @@ def move1(event):
         for i in range(pos, newpos+1): 
             letters[i] = letters[i].upper()
     canvas.itemconfigure(text, text=letters)
-    print pos, newpos
-
+    
 canvas = Canvas(tk)
 canvas.pack(expand=YES, fill=BOTH)
-text = canvas.create_text(200, 150, text=letters, font=('helvetica', 32))
-
+text = canvas.create_text(200, 150, text=letters, font=('Verdana', 32))
 
 tk.bind('<Left>', move)
 tk.bind('<Right>', move)
@@ -175,8 +182,8 @@ tk.bind('<Shift-Left>', move1)
 tk.bind('<Shift-Right>', move1)
 tk.bind('<Escape>', clear)
 
-
 tk.mainloop()
+
 '''
 n = 0
 
